@@ -31,7 +31,7 @@ const browser = await chromium.launch({ executablePath: findChrome() });
 const step = (s) => console.log('·', s);
 
 async function person(label, opts) {
-  const ctx = await browser.newContext(opts);
+  const ctx = await browser.newContext({ ...opts, extraHTTPHeaders: { 'x-swapsteal-test': '1' } });
   const page = await ctx.newPage();
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
@@ -234,7 +234,7 @@ assert.equal(st.recap.haul.length, 6);
 assert.equal(new Set(st.recap.haul.map((h) => h.gift)).size, 6);
 await tv.ctx.close();
 // remove the room game so test runs do not count as real swaps
-assert.equal((await fetch(`${BASE}/api/g/${id}/act`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-token': hostToken }, body: JSON.stringify({ type: 'delete' }) })).status, 200);
+assert.equal((await fetch(`${BASE}/api/g/${id}/act`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-token': hostToken, 'x-swapsteal-test': '1' }, body: JSON.stringify({ type: 'delete' }) })).status, 200);
 
 // ---------------- online game ----------------
 step('online game: hidden gifts');

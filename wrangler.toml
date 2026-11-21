@@ -25,3 +25,11 @@ new_sqlite_classes = ["Game", "Limiter"]
 
 [observability]
 enabled = false
+
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "Stats"
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Stats"]

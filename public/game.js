@@ -26,10 +26,11 @@ function setState(st) {
   render();
 }
 async function poll() {
+  if (dead) return;
   try { setState(await api(`/api/g/${id}`, { token: me && me.token })); } catch (e) { if (e.status === 404) gone(); }
 }
 function connect() {
-  if (TV || !('WebSocket' in window)) { /* TV also uses the socket */ }
+  if (dead) return;
   try {
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     ws = new WebSocket(`${proto}//${location.host}/api/g/${id}/ws${me ? `?t=${encodeURIComponent(me.token)}` : ''}`);
@@ -44,6 +45,7 @@ function connect() {
   ws.onclose = () => {
     clearInterval(pingTimer);
     ws = null;
+    if (dead) return;
     schedulePoll();
     const wait = Math.min(30000, 1000 * 2 ** wsTries++);
     setTimeout(() => { if (!ws && document.visibilityState === 'visible') connect(); }, wait);
@@ -56,9 +58,10 @@ document.addEventListener('visibilitychange', () => {
   if (!ws || ws.readyState > 1) { wsTries = 0; connect(); poll(); }
   else if (ws.readyState === 1) ws.send('state');
 });
-let deleting = false;
+let deleting = false, dead = false;
 function gone() {
   if (deleting) return;
+  dead = true;
   S = null;
   app.innerHTML = `<div class="card narrow center"><h2>This swap isn’t here</h2><p class="muted">It was deleted by the host, expired after 60 days, or the link is wrong.</p><a class="btn" href="/">Start a new swap</a></div>`;
   try { ws && ws.close(); } catch { /* */ }

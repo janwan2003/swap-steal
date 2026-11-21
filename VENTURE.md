@@ -1,10 +1,10 @@
 ---
 slug: swap-steal
-stage: idea
+stage: launched
 priority: 4
-url:
-repo:
-updated: 2026-11-21
+url: https://pb-swap-steal.jan-bef.workers.dev
+repo: https://github.com/janwan2003/swap-steal
+updated: 2026-11-22
 ---
 
 # swap-steal
@@ -86,20 +86,54 @@ Searches run 2026-11-20. Sources are search-result summaries, not opened pages.
 
 ## Status
 
-Idea only. Nothing built. Evidence is the web searches of 2026-11-20 listed above. No page was
-opened directly.
+**Launched 2026-11-22 as "Swapsteal"** at https://pb-swap-steal.jan-bef.workers.dev (product page
+https://janwan2003.github.io/swap-steal/, repo https://github.com/janwan2003/swap-steal). Built as a separate
+venture: the operator has not answered the "mode of `secret-santa-draw`?" question, and the season window would not wait.
+
+What exists (read from code):
+- **Engine** `public/engine.js`: pure functions, replay of a move list (open / steal / swap / keep). Random turn
+  order, steal chains, once-per-turn steal (no steal-back), freeze after N steals (1–5 or no limit), optional final
+  swap for player 1, online mode never opens your own gift unless it is the last, recap stats (most stolen, longest
+  chain, robbed most).
+- **Backend** `src/worker.js`: Worker `pb-swap-steal` + SQLite Durable Objects (`Game` per swap, `Limiter` per IP:
+  20 creates and 80 joins per hour, `Stats` daily aggregate counts). No D1, because the account is at its 10-database
+  limit. Live updates use hibernating WebSockets (a 40-minute party costs a few dozen requests, not thousands of polls),
+  with 8 s polling as fallback. Wrapped gifts' contents and givers are never sent to other players. Swaps are deleted
+  60 days after creation, or at once by the host.
+- **UI**: landing page with create form and SEO copy (rules, FAQ); game page with lobby (link, QR, share, players
+  live, host adds people without a phone, rules), turn panel ("Your turn" + vibration, "X stole your gift"), gift board
+  with steal dots and frozen gifts, turn order, feed, host undo / play for anyone, TV board (`?tv`, QR to watch, wake
+  lock), recap with highlights, PNG recap card (share sheet or download), "Start a swap" CTA for guests.
+  Link preview shows live state: "Join “Office swap” · 6 players so far" → "Office swap · Turn 3 of 6 · 1 steal so far"
+  → "Office swap · Final haul" with the most-stolen gift.
+- **Search Console**: site verified (META), sitemap submitted 2026-11-22 (`scripts/gsc.py`).
+
+Verified (2026-11-22):
+- `node --test tests/unit/*.test.js`: 12/12 pass, including 300 random full games that always end with one gift per player.
+- `tests/e2e/run.mjs` in real Chromium (desktop host + 4 phones at 390 px + a 1920 px TV), green locally and in
+  **2 consecutive runs against production**, with zero console errors. It covers create, join, duplicate name, an
+  offline player, rule change, start, live turn updates without reload, open, steal, chain, no steal-back, freeze,
+  undo, host playing for someone, final swap, recap on every phone, recap PNG, link preview text at each stage, an
+  online game where hidden gifts don't leak to other players or spectators, delete, and no horizontal scroll on phone.
+  Screenshots in `shots/`, `shots-prod/` (not committed).
+- `tools/pages-check.mjs`: product page at 390/1280 px, no console errors, no broken links.
+- Not verified: a real iPhone/Android, WhatsApp/iMessage in-app browsers, real chat-app link previews, vibration
+  (it does not work on iOS Safari at all), and games above 7 players in a browser (the engine is tested to 13).
+
+## Metrics
+
+- 2026-11-22 (from `GET /api/stats`, aggregate daily counts; e2e traffic excluded by header): 0 swaps created,
+  0 joins, 0 started. Launched today. Search Console: no data yet.
 
 ## Next steps
 
-1. Operator call: separate venture or a mode of `secret-santa-draw` (shared audience, shared
-   season).
-2. Game engine as pure functions with tests: turn order, open/steal, per-gift steal limit, no
-   immediate steal-back, frozen gifts, final swap round, recap stats.
-3. Build as `pb-swap-steal` on Cloudflare Pages + Functions + D1 (game, player, gift, move), with
-   short polling for the live board and per-IP rate limits.
-4. TV board view, "your turn" screen on phones, a recap card, and an OG image with live state.
-5. Playwright e2e: 8 players through a full game with steals on phone viewport; screenshots at
-   phone and desktop width.
+1. Operator check on a real phone (inbox entry 2026-11-22): WhatsApp preview, join and play in the in-app browser.
+2. Distribution before ~8 December: an honest listing on AlternativeTo and Product Hunt (needs the operator's
+   accounts, so it goes to the inbox), and check Search Console impressions for "white elephant game online" or
+   "yankee swap app" in a week.
+3. Quality: lobby on TV at 1080p screenshot; a German page (*Schrottwichteln*) for the DACH audience; a
+   "who brought it?" picker for in-room gifts so the recap can show givers.
+4. After the season (January): read `/api/stats`, decide whether to park until October 2027.
 
 ## Monetization plan
 
@@ -112,3 +146,4 @@ remote gift-shipping coordination), seasonal themes. Never paywall joining or pl
   iOS app listing, VISU tool, Miro/Product Hunt/teambuilding guides, Think with Google, Partiful).
   No absolute search volume found.
 - 2026-11-21 review: raised p3→p4. White-elephant parties run through mid-December; ship within ~1 week or wait a year.
+- 2026-11-22 builder: built and launched Swapsteal (engine + 12 unit tests, Worker/Durable Objects with WebSockets, landing, game, TV board, recap card, product page, Search Console verified + sitemap). Verified: unit tests green; Playwright e2e green locally and twice on production with 0 console errors; production run caught and fixed a reconnect-after-delete bug. Stats endpoint reads 0 real swaps.

@@ -52,6 +52,13 @@ async function limited(env, request, bucket) {
   return !(await env.LIMITER.get(env.LIMITER.idFromName(key)).hit(IP_LIMITS[bucket], 3600_000));
 }
 
+// Aggregate daily counts only (no ids, names or IPs), read with GET /api/stats.
+// Requests from the e2e test send x-swapsteal-test: 1 and are not counted.
+async function bump(env, key, n = 1) {
+  if (env.isTest) return;
+  try { await env.STATS.get(env.STATS.idFromName('all')).bump(key, n); } catch (e) { console.error('stats', e); }
+}
+
 async function body(request) {
   if ((request.headers.get('content-length') | 0) > 8000) return null;
   try { return await request.json(); } catch { return null; }
@@ -80,6 +87,7 @@ export default {
       if (m[2] === '/join' && (await limited(env, request, 'join'))) return withHeaders(fail(429, 'Too many joins from this network. Try again later.'));
       return withHeaders(await stub(env, m[1]).fetch(request));
     }
+    if (p === '/api/stats' && request.method === 'GET') return withHeaders(json(await env.STATS.get(env.STATS.idFromName('all')).read()));
     if (p.startsWith('/api/')) return withHeaders(fail(404, 'Not found.'));
     m = p.match(/^\/g\/([^/]+)\/?$/);
     if (m) {
@@ -231,6 +239,7 @@ export class Game extends DurableObject {
 
   async fetch(request) {
     const url = new URL(request.url);
+    this.statsEnv = { STATS: this.env.STATS, isTest: request.headers.get('x-swapsteal-test') === '1' };
     const newId = request.headers.get('x-new-id');
     if (newId) return this.create(request, newId);
     const g = await this.load();
@@ -280,6 +289,7 @@ export class Game extends DurableObject {
     this.game = { v: 1, id, title, mode, maxSteals, finalSwap: b.finalSwap !== false, status: 'lobby', createdAt: Date.now(), members: [host], gifts, order: [], moves: [], version: 0 };
     await this.ctx.storage.setAlarm(Date.now() + KEEP_DAYS * 86400_000);
     await this.save();
+    await bump(this.statsEnv, 'created');
     return json({ id, token: t, me: host.id }, 201);
   }
 
@@ -302,6 +312,7 @@ export class Game extends DurableObject {
     g.members.push(m);
     if (gift) g.gifts.push({ id: rid(6), giver: m.id, ...gift });
     await this.save();
+    await bump(this.statsEnv, 'joined');
     return json({ token: t, me: m.id, state: view(g, m.id, this.connected()) }, 201);
   }
 
@@ -330,6 +341,7 @@ export class Game extends DurableObject {
         if (me.id !== s.active) mv.actor = me.id;
         mv.at = now;
         g.moves.push(mv);
+        if (replay(g).phase === 'done' && !g.finishedAt) { g.finishedAt = now; await bump(this.statsEnv, 'finished'); }
         return ok();
       }
       case 'undo': {
@@ -350,6 +362,8 @@ export class Game extends DurableObject {
         g.order = shuffle(ps.map((p) => p.id), cryptoRand);
         g.status = 'started';
         g.startedAt = now;
+        await bump(this.statsEnv, 'started');
+        await bump(this.statsEnv, 'players', ps.length);
         return ok();
       }
       case 'settings': {
@@ -443,4 +457,24 @@ export class Limiter extends DurableObject {
     return w.n <= limit;
   }
   async alarm() { await this.ctx.storage.deleteAll(); }
+}
+
+export class Stats extends DurableObject {
+  async bump(key, n = 1) {
+    const day = new Date().toISOString().slice(0, 10);
+    const k = `d:${day}`;
+    const d = (await this.ctx.storage.get(k)) || {};
+    d[key] = (d[key] || 0) + n;
+    await this.ctx.storage.put(k, d);
+  }
+  async read() {
+    const all = await this.ctx.storage.list({ prefix: 'd:' });
+    const days = {};
+    const total = {};
+    for (const [k, v] of all) {
+      days[k.slice(2)] = v;
+      for (const [x, n] of Object.entries(v)) total[x] = (total[x] || 0) + n;
+    }
+    return { total, days };
+  }
 }
