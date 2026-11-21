@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Swapsteal · White elephant gift swap game on everyone’s phone</title>
+<meta name="description" content="Run a white elephant (Yankee swap) gift exchange where every guest plays on their own phone. Random turn order, steal limits, frozen gifts and a final swap. Free, no sign-up, no app.">
+<link rel="canonical" href="https://pb-swap-steal.jan-bef.workers.dev/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Swapsteal">
+<meta property="og:title" content="Swapsteal · White elephant on everyone’s phone">
+<meta property="og:description" content="Open a gift or steal one. The app draws the order, enforces the steal rules and shows a live gift board. Free, no sign-up.">
+<meta property="og:url" content="https://pb-swap-steal.jan-bef.workers.dev/">
+<meta property="og:image" content="https://pb-swap-steal.jan-bef.workers.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17603f">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><img src="/icon.svg" alt="" width="32" height="32">Swapsteal</a>
+    <nav><a href="#how" class="hide-sm">How it works</a><a href="#rules" class="hide-sm">Rules</a><a href="#faq">FAQ</a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1>White elephant, on everyone’s phone</h1>
+        <p class="lead">Start a gift swap, share one link, and everyone joins with a nickname. Swapsteal draws the turn order, tells each person when it’s their turn, enforces the steal rules and keeps a live board of who holds what.</p>
+        <ul class="pills"><li>Free</li><li>No sign-up</li><li>No app to install</li><li>In the room or on a video call</li></ul>
+        <p class="muted small" style="margin-top:16px">Also known as Yankee swap, Dirty Santa, Chinese gift exchange, Schrottwichteln or the steal game.</p>
+      </div>
+
+      <form id="create" class="card" autocomplete="off" novalidate>
+        <h2>Start a swap</h2>
+        <label for="title">Name of the swap</label>
+        <input id="title" type="text" maxlength="60" placeholder="Office holiday swap" required>
+        <label for="name">Your name</label>
+        <input id="name" type="text" maxlength="24" placeholder="Ola" required>
+        <label>Where are the gifts?</label>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="mode" value="room" checked><span>In the room<small>Wrapped gifts in a pile. You type what you unwrapped.</small></span></label>
+          <label><input type="radio" name="mode" value="online"><span>Online<small>Remote team or family. Everyone enters their gift, hidden.</small></span></label>
+        </div>
+        <div id="giftFields" class="hidden">
+          <label for="gLabel">Your gift <span class="opt">(hidden until opened)</span></label>
+          <input id="gLabel" type="text" maxlength="70" placeholder="Heated blanket">
+          <label for="gHint">Hint on the wrapping <span class="opt">(optional)</span></label>
+          <input id="gHint" type="text" maxlength="60" placeholder="Soft, big, keeps you warm">
+          <label for="gLink">Link <span class="opt">(optional, shown after opening)</span></label>
+          <input id="gLink" type="url" maxlength="300" placeholder="https://…">
+        </div>
+        <label for="steals">A gift freezes after</label>
+        <select id="steals">
+          <option value="1">1 steal</option>
+          <option value="2">2 steals</option>
+          <option value="3" selected>3 steals (most common)</option>
+          <option value="4">4 steals</option>
+          <option value="5">5 steals</option>
+          <option value="0">Never (no limit)</option>
+        </select>
+        <label class="check"><input id="finalSwap" type="checkbox" checked><span>Final swap: the first player may swap once at the end</span></label>
+        <label class="check" style="margin-top:8px"><input id="plays" type="checkbox" checked><span>I’m playing too (untick if you only host)</span></label>
+        <button class="btn block big" type="submit" style="margin-top:18px">Create swap &amp; get link</button>
+        <div class="err" id="createErr" role="alert"></div>
+        <p class="muted small" style="margin:6px 0 0">No account or email. Swaps are deleted after 60 days.</p>
+      </form>
+    </section>
+
+    <section class="section" id="how">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="card"><h3>Share one link</h3><p class="muted">Post it in the group chat or show the QR code at the party. Guests tap it and type a nickname. Nothing to install.</p></div>
+        <div class="card"><h3>Draw the order</h3><p class="muted">When everyone’s in, the host taps Start. Swapsteal draws a random order and each phone buzzes when it’s that person’s turn.</p></div>
+        <div class="card"><h3>Open or steal</h3><p class="muted">Open a new gift or steal one from the board. Steal chains, frozen gifts and the final swap are all tracked. At the end you get a recap to share.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="rules">
+      <h2>The rules Swapsteal runs</h2>
+      <ul class="features">
+        <li>On your turn, open a new gift or steal any opened gift.</li>
+        <li>If your gift is stolen, you open or steal next. The turn ends when someone opens a new gift.</li>
+        <li>A gift can be stolen only once per turn, so nobody steals straight back.</li>
+        <li>After the set number of steals a gift is frozen and stays where it is.</li>
+        <li>Final swap (optional): player 1 never got to steal, so they may swap once at the end.</li>
+        <li>Online mode: you never open your own gift unless it’s the last one left.</li>
+        <li>The host can undo the last move and play for anyone without a phone.</li>
+        <li>Put the board on a TV with one tap so the whole room can follow.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="faq">
+      <h2>Questions</h2>
+      <details><summary>Does everyone need a phone?</summary><p>No. The host can add people by name (grandma, kids, anyone without a phone) and take their turns for them. Everyone else follows on their own phone, or on the TV board.</p></details>
+      <details><summary>How does it work with real wrapped gifts?</summary><p>Choose “In the room”. On your turn you pick a gift from the pile, unwrap it, and type what it is, such as “Singing fish”. Steals happen on the phone, and you hand the gift over in the room.</p></details>
+      <details><summary>Can a remote team play?</summary><p>Yes. Choose “Online”. Everyone enters the gift they will send, with an optional hint shown on the wrapping and a link that appears once it’s opened. Share the board on your video call. At the end the recap shows who ends up with which gift, so each giver knows where to send theirs.</p></details>
+      <details><summary>How many people can play?</summary><p>Up to 100 players in one swap. Most office and family swaps have 6 to 30.</p></details>
+      <details><summary>Is it really free?</summary><p>Yes. No sign-up, no ads, no per-game fee. Swapsteal never handles money or buys gifts. Gifts are just descriptions.</p></details>
+      <details><summary>What do you store?</summary><p>The swap name, nicknames, gift descriptions and the moves. Nothing else. No email, no cookies, no tracking. Each swap is deleted automatically after 60 days, or right away by the host. See the <a href="/privacy">privacy policy</a>.</p></details>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/privacy">Privacy</a><a href="https://github.com/janwan2003/swap-steal/issues">Support</a>
+    <span>Swapsteal · by Plainbyte</span>
+  </footer>
+</div>
+<script type="module" src="/home.js"></script>
+</body>
+</html>

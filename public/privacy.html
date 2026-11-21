@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17603f">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/app.css">
+<title>Privacy policy · Swapsteal</title>
+<meta name="description" content="How Swapsteal handles data: no account, no cookies, no analytics, no ads. Swaps are deleted automatically after 60 days.">
+<link rel="canonical" href="https://pb-swap-steal.jan-bef.workers.dev/privacy">
+<style>
+.legal{max-width:720px;margin:0 auto;padding:24px 20px 64px;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:#1d2a24;line-height:1.6}
+.legal .legal-brand{display:flex;justify-content:flex-start;width:auto;align-items:center;gap:10px;font-weight:800;font-size:20px;color:#1d2a24;text-decoration:none;margin-bottom:28px}
+.legal h1{font-size:34px;font-weight:800;line-height:1.15;margin:0 0 6px}
+.legal h2{font-size:20px;font-weight:800;margin:32px 0 8px}
+.legal .meta{color:#6b756f;margin:0 0 20px;font-size:15px}
+.legal .lead{background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #e6dfd2}
+.legal a{color:#17603f}
+.legal code{background:#efe9dd;border-radius:6px;padding:1px 6px;font-size:.92em}
+.legal ul{padding-left:22px}
+.legal footer{margin-top:48px;padding-top:16px;border-top:1px solid #e6dfd2;color:#6b756f;font-size:14px}
+</style>
+</head>
+<body style="margin:0;background:#fbf7f0">
+<main class="legal">
+<a class="legal-brand" href="/"><img src="/icon.svg" width="32" height="32" alt="">Swapsteal</a>
+<h1>Privacy policy</h1>
+<p class="meta">Last updated 2026-11-22 · Swapsteal is published by Plainbyte.</p>
+
+<p class="lead">Swapsteal is a gift-swap game you play in the browser. There is no account and no email address. It uses no cookies, no analytics and no ads.</p>
+
+<h2>What is stored</h2>
+<p>To run a swap, the server keeps only what players type in and what happens in the game:</p>
+<ul>
+  <li>the name of the swap;</li>
+  <li>the nicknames players join with;</li>
+  <li>gift descriptions, hints and links typed in by players;</li>
+  <li>the moves: turn order, which gift was opened or stolen, and by whom.</li>
+</ul>
+<p>Everyone who has the swap's link can see this information, so please do not type anything into a nickname or gift you would not want the other players to read.</p>
+
+<h2>How you are recognised</h2>
+<p>When you join a swap, your browser saves a random token in its <code>localStorage</code>. It lets you return to the same swap on the same device and play your turns. It is not a cookie, it contains no personal information, and you can remove it at any time by clearing this site's data in your browser.</p>
+
+<h2>IP addresses</h2>
+<p>To stop one visitor from overloading the service, IP addresses are hashed and the hash is kept for one hour for rate limiting. IP addresses are not stored otherwise.</p>
+
+<h2>Where data is kept</h2>
+<p>Swapsteal runs on Cloudflare Workers and Durable Objects. Cloudflare is our hosting provider and processes requests to deliver the service. We do not sell or share data with anyone else.</p>
+
+<h2>How long it is kept</h2>
+<p>Every swap is deleted automatically 60 days after it was created. The host can delete a swap at any time before that, which removes its name, nicknames, gifts and moves.</p>
+
+<h2>Links to other sites</h2>
+<p>Gift links are typed in by players and open other websites. Those sites have their own privacy policies.</p>
+
+<h2>Contact</h2>
+<p>Questions or requests: <a href="https://github.com/janwan2003/swap-steal/issues">open an issue on GitHub</a>. Issues are public, so do not include personal details.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, the date at the top of this page changes with it.</p>
+<footer>Swapsteal · by Plainbyte · <a href="/">Start a swap</a></footer>
+</main>
+</body>
+</html>

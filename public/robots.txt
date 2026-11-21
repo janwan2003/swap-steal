@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /g/
+Disallow: /api/
+
+Sitemap: https://pb-swap-steal.jan-bef.workers.dev/sitemap.xml
