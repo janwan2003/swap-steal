@@ -125,7 +125,7 @@ Verified (2026-11-22):
   Escape closes dialogs. `tests/e2e/run.mjs` also re-run green locally and on production. `tools/pages-check.mjs`:
   GitHub Pages product page, 0 errors, 0 broken links.
 - Not verified: a real iPhone/Android, WhatsApp/iMessage in-app browsers, real chat-app link previews, vibration
-  (it does not work on iOS Safari at all),, and games above 20 players in a browser (the engine is tested to 13 in random games; 100 is the cap).
+  (it does not work on iOS Safari at all), and games above 20 players in a browser (the engine is tested to 13 in random games; 100 is the cap).
 
 ## Metrics
 
