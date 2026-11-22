@@ -231,7 +231,7 @@ function lobby() {
     }
   }
   const rules = !amHost && !TV ? `<section class="card"><h3>Rules for this swap</h3><p class="muted small" style="margin:0">${S.mode === 'online' ? 'Online gifts' : 'Gifts in the room'} · ${rulesText()}.</p></section>` : '';
-  return `<div class="gtitle"><h1>${esc(S.title)}</h1><span class="badge">${S.mode === 'online' ? 'Online swap' : 'In the room'}</span></div>
+  return `<div class="gtitle"><h1>${esc(S.title)}</h1><span class="badge">${S.mode === 'online' ? 'Online swap' : 'In the room'}</span></div>${tvBrand()}
     <div class="layout"><div>${main}${rules}</div><div>${TV ? '' : shareCard()}${people}</div></div>`;
 }
 
@@ -299,7 +299,7 @@ function boardHtml(clickable) {
     const thisTurn = S.stolenThisTurn.includes(g.id) && !g.frozen;
     return `<${tag} class="gift${g.frozen ? ' frozen' : ''}${can ? ' can' : ''}${S.me && g.holder === S.me.id ? ' mine-now' : ''}${ui.flash === g.id ? ' flash' : ''}"${can ? ` data-a="${S.phase === 'final' ? 'swap' : 'steal'}" data-id="${g.id}"` : ''}>
       ${thisTurn ? '<span class="tag">Stolen this turn</span>' : ''}
-      <span class="gname">${esc(g.label)}</span>
+      <span class="gname" title="${esc(g.label)}">${esc(g.label)}</span>
       ${g.link ? `<a class="glink" href="${esc(g.link)}" target="_blank" rel="noopener nofollow">View gift ↗</a>` : ''}
       ${stealText(g)}
       <span class="holder">${S.me && g.holder === S.me.id ? '<b>You</b> have it' : `with <b>${esc(nameOf(g.holder))}</b>`}${g.giver ? ` · from ${esc(nameOf(g.giver))}` : ''}</span>
@@ -324,10 +324,14 @@ function orderHtml() {
   }).join('')}</ol></section>`;
 }
 
-function feedHtml(limit = 30) {
-  const ev = S.events.slice().reverse().slice(0, limit);
-  return `<section class="card"><h3>What happened</h3>${ev.length ? `<ul class="feed">${ev.map((e) => `<li class="${e.t}"><span class="t">T${e.turn + 1}</span>${eventHtml(e)}</li>`).join('')}</ul>` : '<p class="muted small" style="margin:0">Nothing yet.</p>'}</section>`;
+// Latest moves first. Beyond `limit`, the rest folds into "Show all" (kept open across re-renders).
+function feedHtml(limit = 8) {
+  const ev = S.events.slice().reverse();
+  const li = (e) => `<li class="${e.t}"><span class="t">T${e.turn + 1}</span>${eventHtml(e)}</li>`;
+  const more = !TV && ev.length > limit ? `<details class="more" id="feedMore"${ui.feedOpen ? ' open' : ''}><summary>Show all ${ev.length} moves</summary><ul class="feed">${ev.slice(limit).map(li).join('')}</ul></details>` : '';
+  return `<section class="card"><h3>What happened</h3>${ev.length ? `<ul class="feed">${ev.slice(0, limit).map(li).join('')}</ul>${more}` : '<p class="muted small" style="margin:0">Nothing yet.</p>'}</section>`;
 }
+app.addEventListener('toggle', (e) => { if (e.target.id === 'feedMore') ui.feedOpen = e.target.open; }, true);
 
 function hostTools() {
   if (!S.me || !S.me.host || TV) return '';
@@ -337,14 +341,16 @@ function hostTools() {
     <button class="btn ghost small" data-a="share">Share link</button></div></section>`;
 }
 
+const tvBrand = () => (TV ? `<div class="tvbrand"><img src="/icon.svg" alt="" width="40" height="40"><span><b>Swapsteal</b><br>Run your own swap free at ${esc(location.host)}</span></div>` : '');
+
 function play() {
   const mine = isMe(S.active);
   const activeM = S.members.find((m) => m.id === S.active) || {};
   const clickable = !TV && (mine || (S.me && S.me.host && (activeM.offline || ui.hostAct === S.version)));
   const side = TV
-    ? `${orderHtml()}${feedHtml(8)}<section class="card center"><img id="qrTv" class="qr" alt="QR code" style="width:11vw;height:11vw"><p class="muted small" style="margin:6px 0 0">Scan to watch on your phone</p></section>`
+    ? `${orderHtml()}${feedHtml(5)}<section class="card center"><img id="qrTv" class="qr" alt="QR code" style="width:11vw;height:11vw"><p class="muted small" style="margin:6px 0 0">Scan to watch on your phone</p></section>`
     : `${orderHtml()}${feedHtml()}${hostTools()}${!S.me ? '<section class="card"><p class="muted small" style="margin:0">You’re watching. The swap started before you joined.</p></section>' : ''}`;
-  return `<div class="gtitle"><h1>${esc(S.title)}</h1><span class="badge ${S.totalSteals ? 'red' : ''}">${S.totalSteals} steal${S.totalSteals === 1 ? '' : 's'}</span></div>
+  return `<div class="gtitle"><h1>${esc(S.title)}</h1><span class="badge ${S.totalSteals ? 'red' : ''}">${S.totalSteals} steal${S.totalSteals === 1 ? '' : 's'}</span></div>${tvBrand()}
     <div class="layout"><div>${turnPanel()}<div style="height:14px"></div>${boardHtml(clickable)}</div><div>${side}</div></div>`;
 }
 
@@ -362,7 +368,7 @@ function done() {
     return h ? `<p><b>Send your gift to ${esc(h.name)}.</b> ${isMe(h.id) ? '(You kept your own!)' : ''}</p>` : '';
   })() : '';
   const myGift = S.me ? r.haul.find((h) => h.id === S.me.id) : null;
-  return `<div class="gtitle"><h1>${esc(S.title)}: final haul</h1><span class="badge gold">Finished</span></div>
+  return `<div class="gtitle"><h1>${esc(S.title)}: final haul</h1><span class="badge gold">Finished</span></div>${tvBrand()}
     <div class="layout"><div>
       <section class="card">${myGift ? `<h2>You ended up with ${esc(myGift.gift)} 🎉</h2>` : '<h2>The swap is over 🎉</h2>'}${send}
         <div class="stats">${stats.join('')}</div>
@@ -371,7 +377,7 @@ function done() {
       </section>
     </div><div>
       <section class="cta hide-tv"><h2>Going to another party?</h2><p>Run your own swap in 30 seconds. Free, no sign-up.</p><a class="btn" href="/">Start a swap</a></section>
-      <div style="height:14px"></div>${feedHtml(100)}
+      <div style="height:14px"></div>${feedHtml(TV ? 8 : 12)}
       ${S.me && S.me.host && !TV ? `<section class="card host-only"><div class="row"><button class="btn ghost small" data-a="undo">Undo last move</button><button class="linkbtn small" data-a="delete">Delete this swap</button></div></section>` : ''}
     </div></div>`;
 }
@@ -382,7 +388,10 @@ function sheet(html, onOk) {
   bg.className = 'sheet-bg';
   bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}<div class="row" style="margin-top:16px"><button class="btn red grow" data-ok>Yes</button><button class="btn ghost grow" data-cancel>Cancel</button></div></div>`;
   document.body.append(bg);
-  const close = () => bg.remove();
+  const prev = document.activeElement;
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  const close = () => { bg.remove(); document.removeEventListener('keydown', onKey); if (prev && prev.isConnected) prev.focus(); };
+  document.addEventListener('keydown', onKey);
   bg.addEventListener('click', (e) => { if (e.target === bg || e.target.closest('[data-cancel]')) close(); });
   const ok = bg.querySelector('[data-ok]');
   ok.textContent = onOk.label || 'Yes';

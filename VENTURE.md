@@ -117,13 +117,22 @@ Verified (2026-11-22):
   online game where hidden gifts don't leak to other players or spectators, delete, and no horizontal scroll on phone.
   Screenshots in `shots/`, `shots-prod/` (not committed).
 - `tools/pages-check.mjs`: product page at 390/1280 px, no console errors, no broken links.
+- 2026-11-22 quality session: `tests/e2e/stress.mjs` (new) in real Chromium, green locally and on production
+  (deploy version `611c073a`): a 20-player swap with 24-character names and 70-character gifts, played through
+  60 moves / 40 steals, screenshots at 360 px phone, 1280 px desktop and 1920 px TV (lobby, board, recap); landing,
+  privacy, 404 and deleted-swap pages at 360 and 1280 px. Asserts no horizontal scroll, no element overflowing its
+  box, no console errors, the three "How it works" cards aligned, no broken in-page links, recap PNG renders,
+  Escape closes dialogs. `tests/e2e/run.mjs` also re-run green locally and on production. `tools/pages-check.mjs`:
+  GitHub Pages product page, 0 errors, 0 broken links.
 - Not verified: a real iPhone/Android, WhatsApp/iMessage in-app browsers, real chat-app link previews, vibration
-  (it does not work on iOS Safari at all), and games above 7 players in a browser (the engine is tested to 13).
+  (it does not work on iOS Safari at all),, and games above 20 players in a browser (the engine is tested to 13 in random games; 100 is the cap).
 
 ## Metrics
 
 - 2026-11-22 (from `GET /api/stats`, aggregate daily counts; e2e traffic excluded by header): 0 swaps created,
   0 joins, 0 started. Launched today. Search Console: no data yet.
+- 2026-11-22 ~17:00 (same sources): `/api/stats` returns `{"total":{},"days":{}}`, so 0 real swaps. Search Console
+  (`python3 scripts/gsc.py status`): sitemap still pending, search analytics 2026-10-25..11-22 has no rows.
 
 ## Next steps
 
@@ -131,7 +140,7 @@ Verified (2026-11-22):
 2. Distribution before ~8 December: an honest listing on AlternativeTo and Product Hunt (needs the operator's
    accounts, so it goes to the inbox), and check Search Console impressions for "white elephant game online" or
    "yankee swap app" in a week.
-3. Quality: lobby on TV at 1080p screenshot; a German page (*Schrottwichteln*) for the DACH audience; a
+3. Quality: a German page (*Schrottwichteln*) for the DACH audience; a
    "who brought it?" picker for in-room gifts so the recap can show givers.
 4. After the season (January): read `/api/stats`, decide whether to park until October 2027.
 
@@ -147,3 +156,5 @@ remote gift-shipping coordination), seasonal themes. Never paywall joining or pl
   No absolute search volume found.
 - 2026-11-21 review: raised p3→p4. White-elephant parties run through mid-December; ship within ~1 week or wait a year.
 - 2026-11-22 builder: built and launched Swapsteal (engine + 12 unit tests, Worker/Durable Objects with WebSockets, landing, game, TV board, recap card, product page, Search Console verified + sitemap). Verified: unit tests green; Playwright e2e green locally and twice on production with 0 console errors; production run caught and fixed a reconnect-after-delete bug. Stats endpoint reads 0 real swaps.
+- 2026-11-22 review: kept p4. URL 200, 0 console errors (headless Chromium, 390 px, 2026-11-22 ~03:40 UTC); Search Console 0 impressions 11-01→11-22; `/api/stats` empty (0 swaps). Under 21 days live, so no traction verdict. Office parties run through mid-Dec.
+- 2026-11-22 builder (quality): new `tests/e2e/stress.mjs` (20 players, longest names/gifts, phone/desktop/TV, static pages) found and fixed: landing "How it works" card 1 misaligned 14 px; TV recap stats white-on-cream (unreadable); TV turn-order numbers invisible; 24-char unbroken names spilling out of gift cards at 360 px; recap PNG showing 10 of 20 players while leaving space empty and cutting "was stolen N×" off long gift names; long titles truncated on the card; move feed rendering all 60 moves on phones (now latest 8 + "Show all"); dialogs not closing on Escape; 404 page said deleted "after they start" (it is after creation); privacy page said "no analytics" without disclosing the daily aggregate counters. Added: landing hero product preview, TV brand line "Run your own swap free at …", two-column player list on TV. Verified: unit 12/12, run.mjs + stress.mjs green locally and on production, pages-check 0 errors.
